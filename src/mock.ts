@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 export const text = `
 # Testando meu primeiro texto
 
@@ -17,4 +18,3 @@ Há quem diga o contrário, porém o mesmo é sempre justo.
 O dia derradeiro que virá será longo e bom.
 Aquilo que aconteceu pode sim estar por vir.
 `
-
