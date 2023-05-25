@@ -66,6 +66,7 @@ export default function Reader(props: Props) {
     ...defaultComponents.filter(
       (config) => !customComponentsPattern?.includes(config.regex)
     ),
+
     ...(props.config?.components || []),
   ]
 
