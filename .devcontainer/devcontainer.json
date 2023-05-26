@@ -7,10 +7,10 @@
   "customizations": {
     "vscode": {
       "extensions": [
-		"styled-components.vscode-styled-components",
-		"esbenp.prettier-vscode",
-		"rvest.vs-code-prettier-eslint"
-	]
+        "styled-components.vscode-styled-components",
+        "esbenp.prettier-vscode",
+        "rvest.vs-code-prettier-eslint"
+      ]
     }
   }
   // Features to add to the dev container. More info: https://containers.dev/features.

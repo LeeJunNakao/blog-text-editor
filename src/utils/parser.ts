@@ -1,13 +1,13 @@
 // String
 
-export const isJson = (text: string) => {
+export const isJsonProp = (text: string) => {
   return (
     /(\w+:.+;?\s*)+/.test(text) &&
     !/https:\/\/|www\.[\w\d]+\.[\w\d]+/.test(text)
   );
 };
 
-export const isNumber = (text: string) => {
+export const isNumberProp = (text: string) => {
   return /^\d*$/.test(text);
 };
 
@@ -15,7 +15,7 @@ export const propStringToJson = (props: string) => {
   const propString = props.split(';').map((i) => i.trim());
   const propEntries = propString.map((prop) => prop.split(':'));
   const parsedEntries = propEntries.map(([key, value]) => {
-    if (isNumber(value)) {
+    if (isNumberProp(value)) {
       return [key, Number(value)];
     }
     return [key, value];
@@ -51,11 +51,11 @@ export const extractPropsFromStringifiedComponent = (
       const [key, value] = propStr.split('=');
       const cleanedValue = value.replace(/"/g, '');
 
-      if (isJson(cleanedValue)) {
+      if (isJsonProp(cleanedValue)) {
         return [key, propStringToJson(cleanedValue)];
       }
 
-      if (isNumber(cleanedValue)) {
+      if (isNumberProp(cleanedValue)) {
         return [key, Number(cleanedValue)];
       }
 

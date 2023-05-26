@@ -5,9 +5,7 @@ type Props = {
   src: string;
   title: string;
   subtitle: string;
-  style?: {
-    float: 'left' | 'right';
-  };
+  style?: S.WrapperProps;
 };
 
 export default function Image(props: Props) {

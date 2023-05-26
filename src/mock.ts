@@ -80,7 +80,7 @@ type Props = {
 </code>
 
 
-<img src="https://www.google.com.br/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" title="logo" subtitle="meu logo" style="float: left">
+<img src="https://www.google.com.br/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" title="logo" subtitle="meu logo" style="float: left; width: 30%; height: 200px">
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut sit amet pretium ante, quis molestie dui. Fusce tristique, purus eu interdum lacinia, sapien dolor fermentum lorem, a laoreet risus sem vitae nibh. Integer ut enim non enim lobortis tincidunt. Sed tempus tempor enim, eu luctus eros vulputate et. Praesent sagittis quam sed faucibus tempor. Phasellus a bibendum turpis. Curabitur velit tellus, lobortis a felis vel, sagittis egestas est. Fusce dapibus odio quis nulla dapibus hendrerit. Pellentesque in ante dapibus, mollis ex quis, dictum erat. Duis bibendum lectus augue, vel consequat tortor bibendum ac. Praesent vulputate vehicula mattis.
 
