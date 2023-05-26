@@ -19,10 +19,13 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
     'max-len': ['error', { code: 80 }],
+    'comma-dangle': ["error", "only-multiline"],
+    "semi": ["error", "always"]
   },
   settings: {
     react: {
       version: 'detect',
     },
   },
+  
 }

@@ -1,79 +1,176 @@
 /* eslint-disable react/display-name */
-import React from 'react'
-import { ComponentsPattern } from './component-patters'
-import * as Typography from '../typography'
-import * as S from './styles'
+import React from 'react';
+import { v4 as uuid } from 'uuid';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import {
+  docco,
+  defaultStyle,
+  dracula,
+} from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {
+  ComponentsPattern,
+  ComponentConfig,
+  ComponentHandler,
+  MapText,
+} from './components';
+import Typography from '../Typography';
+import Image from '../Image';
+import * as S from './styles';
 
-type ComponentConfig = {
-  regex: RegExp
-  component: React.FC<any>
-}
+type Config = {
+  components: ComponentConfig[];
+};
 
 type Props = {
-  children: string | undefined
-  config?: {
-    components: ComponentConfig[]
-  }
-}
+  children: string | undefined;
+  config?: Config;
+};
 
 const defaultComponents: ComponentConfig[] = [
   {
     regex: ComponentsPattern.H1,
-    component: Typography.H1,
+    component: Typography,
+    handler: ComponentHandler.default,
+    props: {
+      type: 'H1',
+    },
   },
   {
     regex: ComponentsPattern.H2,
-    component: Typography.H2,
+    component: Typography,
+    handler: ComponentHandler.default,
+    props: {
+      type: 'H2',
+    },
   },
   {
     regex: ComponentsPattern.H3,
-    component: Typography.H3,
+    component: Typography,
+    handler: ComponentHandler.default,
+    props: {
+      type: 'H3',
+    },
   },
   {
     regex: ComponentsPattern.Paragraph,
-    component: Typography.Paragraph,
+    component: Typography,
+    handler: ComponentHandler.default,
+    props: {
+      type: 'Paragraph',
+    },
   },
-]
+  {
+    regex: ComponentsPattern.Code,
+    component: SyntaxHighlighter,
+    handler: ComponentHandler.code,
+    props: {},
+  },
+  {
+    regex: ComponentsPattern.Image,
+    component: Image,
+    handler: ComponentHandler.default,
+    props: {},
+  },
+];
 
-const breakText = (text: string) => {
-  return text.split('\n')
-}
+const mapAndReplaceComponentString = (
+  text: string,
+  components: ComponentConfig[]
+): [string, MapText] => {
+  const mapText: MapText = {};
 
-const insertComponentIfMatched =
-  (components: ComponentConfig[]) => (text: string) => {
-    const matched = components.find((c) => c.regex.test(text))
-    const Paragraph = components.find(
-      (c) => c.regex === ComponentsPattern.Paragraph
-    ) as ComponentConfig
+  const replacedText = components.reduce((text, componentData) => {
+    const matched = text.matchAll(new RegExp(componentData.regex, 'gm'));
 
-    if (matched) {
-      const Component = matched.component
+    return Array.from(matched).reduce((parsedText, item) => {
+      const [originalString, content] = item;
 
-      return <Component>{text.replace(matched.regex, '')}</Component>
+      return parsedText.replaceAll(originalString, () => {
+        const textId = uuid();
+        mapText[textId] = {
+          content,
+          originalText: originalString,
+          componentData,
+        };
+
+        return `§${textId}§`;
+      });
+    }, text);
+  }, text);
+
+  return [replacedText, mapText];
+};
+
+const insertComponent =
+  (componentsData: ComponentConfig[], mapText: MapText) => (line: string) => {
+    const data = mapText[line.replaceAll('§', '')];
+
+    const Paragraph = componentsData.find(
+      (d) => d.regex === ComponentsPattern.Paragraph
+    ) as ComponentConfig;
+
+    if (data) {
+      return (
+        <Paragraph.component key={uuid()} {...Paragraph.props}>
+          {data.componentData.handler(
+            data.content,
+            data.originalText,
+            data.componentData.component,
+            data.componentData.props
+          )}
+        </Paragraph.component>
+      );
     }
 
-    return <Paragraph.component>{text}</Paragraph.component>
-  }
+    return (
+      <Paragraph.component key={uuid()} {...Paragraph.props}>
+        {line}
+      </Paragraph.component>
+    );
+  };
 
-const injectComponents = (lines: string[], components: ComponentConfig[]) => {
-  return lines.map(insertComponentIfMatched(components))
-}
+const parseTextAndMountComponent = (text: string, config: Config) => {
+  const defaultComponentsReplaced = defaultComponents.map((dataConfig) => {
+    const customComponentData = config.components.find(
+      (i) => i.regex === dataConfig.regex
+    );
+
+    if (customComponentData) {
+      return {
+        ...customComponentData,
+        props: { ...dataConfig.props, ...customComponentData.props },
+      };
+    }
+
+    return dataConfig;
+  });
+
+  const customComponentsPattern = defaultComponentsReplaced.map((i) => i.regex);
+
+  const replacedComponentsData = [
+    ...defaultComponentsReplaced,
+
+    ...config.components.filter(
+      (data) => !customComponentsPattern.includes(data.regex)
+    ),
+  ];
+
+  const [replacedText, mapText] = mapAndReplaceComponentString(
+    text,
+    replacedComponentsData
+  );
+
+  return replacedText
+    .split('\n')
+    .map(insertComponent(replacedComponentsData, mapText));
+};
 
 export default function Reader(props: Props) {
-  const customComponentsPattern = props.config?.components.map((i) => i.regex)
+  const Components = parseTextAndMountComponent(
+    props.children || '',
+    props.config || { components: [] }
+  );
 
-  const replacedComponents = [
-    ...defaultComponents.filter(
-      (config) => !customComponentsPattern?.includes(config.regex)
-    ),
-
-    ...(props.config?.components || []),
-  ]
-
-  const Components = injectComponents(
-    breakText(props.children || ''),
-    replacedComponents
-  )
-
-  return <S.Wrapper>{Components}</S.Wrapper>
+  return <S.Wrapper>{Components}</S.Wrapper>;
 }
